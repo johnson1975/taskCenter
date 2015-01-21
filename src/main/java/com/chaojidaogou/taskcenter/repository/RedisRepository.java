@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,16 +16,12 @@ public class RedisRepository {
     @Inject
     private RedisTemplate<String, String> stringRedisTemplate;
 
-    public void add(String key, String value, double score) {
-        stringRedisTemplate.opsForZSet().add(key, value, score);
+    public void add(String key, String value) {
+        stringRedisTemplate.opsForList().leftPush(key, value);
     }
 
-    public void remove(String key, Long value) {
-        stringRedisTemplate.opsForZSet().remove(key, value);
-    }
-
-    public Set<ZSetOperations.TypedTuple<String>> members(String key) {
-        return stringRedisTemplate.opsForZSet().reverseRangeWithScores(key, 0, -1);
+    public List<String> members(String key) {
+        return stringRedisTemplate.opsForList().range(key, 0, -1);
     }
 
     public Long count(String key) {
@@ -33,5 +30,9 @@ public class RedisRepository {
 
     public Long increment(String key) {
         return stringRedisTemplate.opsForValue().increment(key, 1l);
+    }
+
+    public void removeKeys() {
+        stringRedisTemplate.delete(stringRedisTemplate.keys("*inbox"));
     }
 }

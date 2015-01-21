@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,7 +39,7 @@ public class TaskManager {
     }
 
     private void putTaskIntoInbox(User user, Task task) {
-        redisRepository.add(user.getInbox(), task.getTaskId().toString(), new Date().getTime());
+        redisRepository.add(user.getInbox(), task.getTaskId().toString());
     }
 
     public void schedule(final Task task) {

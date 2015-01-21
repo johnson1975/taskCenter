@@ -8,16 +8,14 @@ import com.chaojidaogou.taskcenter.domain.task.TaskView;
 import com.chaojidaogou.taskcenter.repository.RedisRepository;
 import com.chaojidaogou.taskcenter.repository.TaskRepository;
 import com.chaojidaogou.taskcenter.repository.TaskTypeRepository;
-import org.joda.time.DateTime;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by Administrator on 2015/1/20.
@@ -34,6 +32,11 @@ public class TaskServiceImpl implements TaskService {
     private TaskManager taskManager;
     @Inject
     private RedisRepository redisRepository;
+
+    @PostConstruct
+    private void init() {
+        redisRepository.removeKeys();
+    }
 
     @Override
     public TaskType addTaskType(TaskType taskType) {
@@ -76,11 +79,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskView> getTasks(Long uid) {
-        Set<ZSetOperations.TypedTuple<String>> taskIdList = redisRepository.members(Keys.uidInboxQueue(uid));
+        List<String> taskIdList = redisRepository.members(Keys.uidInboxQueue(uid));
         List<TaskView> result = new ArrayList<>();
-        for (ZSetOperations.TypedTuple<String> t : taskIdList) {
-            Task task = taskRepository.findOne(Long.parseLong(t.getValue()));
-            result.add(TaskView.valueOf(task, new Date(t.getScore().longValue())));
+        for (String taskId : taskIdList) {
+            Task task = taskRepository.findOne(Long.parseLong(taskId));
+            result.add(TaskView.valueOf(task, new Date()));
         }
         return result;
     }

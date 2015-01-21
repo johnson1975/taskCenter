@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.Schedule;
 import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,7 +25,7 @@ public class DataImporter {
     @Inject
     private UserRepository userRepository;
 
-//    @PostConstruct
+    @PostConstruct
     public void importUserData() {
         userRepository.save(jdbcTemplate.query(importUserSQL, new RowMapper<User>() {
             @Override
